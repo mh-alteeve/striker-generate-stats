@@ -1,0 +1,41 @@
+#!/bin/bash
+scratch=$(mktemp -d -t tmp.XXXXXXXXXX)
+
+datestamp=$(date +%F)
+hostsfile="/etc/hosts"
+hostsarr=()
+#
+function finish {
+  rm -rf "$scratch"
+## Debug
+#  echo "Trap call."
+}
+trap finish EXIT
+
+echo "Customer Name?"
+read CustName
+
+# Not behaving as expected
+#if $(ls ~/sysstat\ dirs/); then
+#   echo "Sysstat Dir Exists"
+#else
+#   mkdir ~/sysstat\ dirs
+#fi
+cd ~/sysstat\ dirs
+touch $scratch/nodeips;IFS=$'\n' && for line in $(egrep '10\.20\.[1-9]0\.[1-9].*$' $hostsfile); do
+   printf '%s' $line | awk '{ print $1 }' >> $scratch/nodeips 
+done
+
+nodeips=$(sort $scratch/nodeips)
+# To handle duplicates - needs switch?
+#nodeips=$(sort $scratch/nodeips | uniq -d)
+
+i=0 && for line in ${nodeips}; do
+   ((i=i+1))
+#   printf 'scp -r %s:/var/log/sa %s_Node%s_%s_sysstat/\n' $line $CustName $i $datestamp
+   scp -r $line:/var/log/sa ${CustName}_Node${i}_${datestamp}_sysstat
+done
+## To Incorporate
+#for file in $(find . -regex ".*Node1.*sa[0-9]*" -type f); do sadf -dht $file -- -S -u -r -p -q -n DEV >> SummitOptical_Node1_$(date +%F)_30Day_sysstat.csv;done
+## Debug
+#echo "nodeips is: $nodeips"
