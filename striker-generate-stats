@@ -2,4 +2,7 @@
 
 use Text::CSV_XS;
 
+my $aoh = csv (in => "data.csv",
+		headers => "auto");
 
+csv (in => $aoh, out => "file.csv", sep_char=> ",");
