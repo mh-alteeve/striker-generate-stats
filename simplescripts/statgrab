@@ -3,6 +3,7 @@ scratch=$(mktemp -d -t tmp.XXXXXXXXXX)
 
 datestamp=$(date +%F)
 hostsfile="/etc/hosts"
+SCHostSelect="SELECT host_name FROM hsots;"
 hostsarr=()
 #
 function finish {
@@ -22,8 +23,8 @@ read CustName
 #   mkdir ~/sysstat\ dirs
 #fi
 cd ~/sysstat\ dirs
-touch $scratch/nodeips;IFS=$'\n' && for line in $(egrep '10\.20\.[1-9]0\.[1-9].*$' $hostsfile); do
-   printf '%s' $line | awk '{ print $1 }' >> $scratch/nodeips 
+touch $scratch/nodeips;IFS=$'\n' && for line in $(su - postgres -c "psql scancore -c '$SCHostSelect'" | egrep -e "[a-z]*-a.*n.*\."); do
+   printf '%s' $line >> $scratch/nodeips 
 done
 
 nodeips=$(sort $scratch/nodeips)
