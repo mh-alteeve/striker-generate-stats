@@ -24,7 +24,9 @@ read CustName
 #fi
 cd ~/sysstat\ dirs
 touch $scratch/nodeips;IFS=$'\n' && for line in $(su - postgres -c "psql scancore -c '$SCHostSelect' | egrep -e '[a-z]*-a.*n.*\.'"); do
-   printf '%s' $line >> $scratch/nodeips 
+   if [[ "$line" != *'DELETED' ]]; then
+      printf '%s\n' $line >> $scratch/nodeips
+   fi
 done
 
 nodeips=$(sort $scratch/nodeips)
