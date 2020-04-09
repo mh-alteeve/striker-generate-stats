@@ -16,14 +16,14 @@ trap finish EXIT
 echo "Customer Name?"
 read CustName
 
-# Not behaving as expected
-#if $(ls ~/sysstat\ dirs/); then
-#   echo "Sysstat Dir Exists"
-#else
-#   mkdir ~/sysstat\ dirs
-#fi
+if [ -d "~/sysstat\ dirs" ]; then
+   echo "Found existing ~/sysstat dirs/. Proceeding..."
+else
+   echo "~/sysstat dirs Directory does not exist. Creating it..."
+   mkdir ~/sysstat\ dirs
+fi
 cd ~/sysstat\ dirs
-touch $scratch/nodeips;IFS=$'\n' && for line in $(su - postgres -c "psql scancore -c '$SCHostSelect' | egrep -e '[a-z]*-a.*n.*\.'"); do
+touch $scratch/nodeips;IFS=$'\n' && for line in $(su - postgres -c "psql scancore -c '$SCHostSelect' | egrep -e '[a-z]*-a.*n.*\.'" | sed 's/ //g'); do
    if [[ "$line" != *'DELETED' ]]; then
       printf '%s\n' $line >> $scratch/nodeips
    fi
@@ -35,6 +35,7 @@ nodeips=$(sort $scratch/nodeips)
 
 i=0 && for line in ${nodeips}; do
    ((i=i+1))
+## Verify the scp coommands are correct by printing. scp can wipe out directories!
 #   printf 'scp -r %s:/var/log/sa %s_Node%s_%s_sysstat/\n' $line $CustName $i $datestamp
    scp -r $line:/var/log/sa ${CustName}_Node${i}_${datestamp}_sysstat
 done
